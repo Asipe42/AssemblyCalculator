@@ -14,6 +14,7 @@ INCLUDE Irvine32.inc
 main PROC
     call Clrscr
 
+Run:
     ; 첫 번째 숫자 입력
     mov edx, OFFSET promptNum1
     call WriteString
@@ -77,8 +78,8 @@ PrintResult:
     mov eax, [result]
 
     call WriteInt
-
     call Crlf
+    jmp Run
     
     exit
 main ENDP
