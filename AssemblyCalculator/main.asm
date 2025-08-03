@@ -59,16 +59,23 @@ DoSub:
     jmp PrintResult
 
 DoMul:
+    mov eax, [num1]
+    imul eax, [num2]
+    mov [result], eax
     jmp PrintResult
 
 DoDiv:
+    mov eax, [num1]
+    cdq
+    idiv dword ptr [num2]
+    mov [result], eax
     jmp PrintResult
 
 PrintResult:
     mov edx, OFFSET resultMsg
     call WriteString
-
     mov eax, [result]
+
     call WriteInt
 
     call Crlf
