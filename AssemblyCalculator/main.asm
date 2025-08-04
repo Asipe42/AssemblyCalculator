@@ -4,6 +4,9 @@ INCLUDE Irvine32.inc
     msg_oper BYTE "Enter an operator (+, -, *, /): ",0
     msg_result BYTE "Result: ",0
 
+    str_space BYTE " ",0
+    str_equal BYTE " = ",0
+
     num1 DWORD ?
     num2 DWORD ?
     operator BYTE ?
@@ -28,8 +31,7 @@ main_loop:
 
     mov edx, OFFSET msg_result
     call WriteString
-    mov eax, [result]
-    call WriteInt
+    call print_expression
     call Crlf
 
     jmp main_loop
@@ -97,5 +99,33 @@ do_div:
     ret
 
 calculate_result ENDP
+
+print_expression PROC
+    mov eax, [num1]
+    call WriteInt
+
+    mov edx, OFFSET str_space
+    call WriteString
+
+    mov al, [operator]
+    mov ah, 0
+    mov dl, al
+    call WriteChar
+
+    mov edx, OFFSET str_space
+    call WriteString
+
+    mov eax, [num2]
+    call WriteInt
+
+    mov edx, OFFSET str_equal
+    call WriteString
+
+    mov eax, [result]
+    call WriteInt
+    call Crlf
+    ret
+
+print_expression ENDP
 
 END main
