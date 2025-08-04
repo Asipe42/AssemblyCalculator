@@ -1,86 +1,101 @@
 INCLUDE Irvine32.inc
 .data
-    promptNum1 BYTE "Enter the first number: ",0
-    promptOper BYTE "Enter the operator (+, -, *, /): ",0
-    promptNum2 BYTE "Enter the second number: ",0
-    resultMsg BYTE "Result: ",0
+    msg_num BYTE "Enter a number: ",0
+    msg_oper BYTE "Enter an operator (+, -, *, /): ",0
+    msg_result BYTE "Result: ",0
 
     num1 DWORD ?
     num2 DWORD ?
-    oper BYTE ?
+    operator BYTE ?
     result DWORD ?
 
 .code
+
 main PROC
-    call Clrscr
+    call clrscr
 
-Run:
-    ; 첫 번째 숫자 입력
-    mov edx, OFFSET promptNum1
-    call WriteString
-    call ReadInt
+main_loop:
+    call read_validated_number
     mov [num1], eax
-  
-    ; 연산자 입력
-    mov edx, OFFSET promptOper
-    call WriteString
-    call ReadChar
-    mov [oper], al
 
-    ; 두 번째 숫자 입력
-    call Crlf
-    mov edx, OFFSET promptNum2
-    call WriteString
-    call ReadInt
+    call read_validated_operator
+    mov [operator], al
+
+    call read_validated_number
     mov [num2], eax
 
-    mov al, [oper]
+    call calculate_result
+
+    mov edx, OFFSET msg_result
+    call WriteString
+    mov eax, [result]
+    call WriteInt
+    call Crlf
+
+    jmp main_loop
+    exit
+
+main ENDP
+
+; 숫자 입력, 검증, 변환
+read_validated_number PROC
+    mov edx, OFFSET msg_num
+    call WriteString
+    call ReadInt
+    ret
+
+read_validated_number ENDP
+
+; 연산자 입력, 검증
+read_validated_operator PROC
+    mov edx, OFFSET msg_oper
+    call WriteString
+    call ReadChar
+    call Crlf
+    ret
+
+read_validated_operator ENDP
+
+; 계산
+calculate_result PROC
+    mov al, [operator]
     cmp al, '+'
-    je DoAdd
+    je do_add
 
     cmp al, '-'
-    je DoSub
+    je do_sub
 
     cmp al, '*'
-    je DoMul
+    je do_mul
 
     cmp al, '/'
-    je DoDiv
+    je do_div
 
-DoAdd:
+do_add:
     mov eax, [num1]
     add eax, [num2]
     mov [result], eax
-    jmp PrintResult
+    ret
 
-DoSub:
+do_sub:
     mov eax, [num1]
     sub eax, [num2]
     mov [result], eax
-    jmp PrintResult
+    ret
 
-DoMul:
+do_mul:
     mov eax, [num1]
     imul eax, [num2]
     mov [result], eax
-    jmp PrintResult
+    ret
 
-DoDiv:
+do_div:
     mov eax, [num1]
     cdq
     idiv dword ptr [num2]
     mov [result], eax
-    jmp PrintResult
+    ret
 
-PrintResult:
-    mov edx, OFFSET resultMsg
-    call WriteString
-    mov eax, [result]
+calculate_result ENDP
 
-    call WriteInt
-    call Crlf
-    jmp Run
-    
-    exit
-main ENDP
 END main
