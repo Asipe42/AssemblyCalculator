@@ -3,6 +3,7 @@ INCLUDE Irvine32.inc
     msg_num BYTE "Enter a number: ",0
     msg_oper BYTE "Enter an operator (+, -, *, /): ",0
     msg_result BYTE "Result: ",0
+    msg_zero_div BYTE "Error: Division by zero is not allowed.",0
 
     str_space BYTE " ",0
     str_equal BYTE " = ",0
@@ -39,7 +40,7 @@ main_loop:
 
 main ENDP
 
-; 숫자 입력, 검증, 변환
+; 숫자 입력
 read_validated_number PROC
     mov edx, OFFSET msg_num
     call WriteString
@@ -48,7 +49,7 @@ read_validated_number PROC
 
 read_validated_number ENDP
 
-; 연산자 입력, 검증
+; 연산자 입력
 read_validated_operator PROC
     mov edx, OFFSET msg_oper
     call WriteString
@@ -92,9 +93,22 @@ do_mul:
     ret
 
 do_div:
+    mov eax, [num2]
+    cmp eax, 0
+    je divide_by_zero_error
+    
     mov eax, [num1]
     cdq
     idiv dword ptr [num2]
+    mov [result], eax
+    ret
+
+divide_by_zero_error:
+    mov edx, OFFSET msg_zero_div
+    call WriteString
+    call Crlf
+
+    mov eax, 0
     mov [result], eax
     ret
 
