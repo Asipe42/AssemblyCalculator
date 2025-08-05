@@ -1,8 +1,22 @@
 INCLUDE Irvine32.inc
 .data
-    msg_num BYTE "Enter a number: ",0
-    msg_oper BYTE "Enter an operator (+, -, *, /, %, ^): ",0
-    msg_result BYTE "Result: ",0
+    box_calc01 BYTE "╔══════════════════════════╗",0dh,0ah,0
+    box_calc02 BYTE "║        Calculator        ║",0dh,0ah,0
+    box_calc03 BYTE "╠══════════════════════════╣",0dh,0ah,0
+    box_calc04 BYTE "║ 1) Addition (+)          ║",0dh,0ah,0
+    box_calc05 BYTE "║ 2) Subtraction (-)       ║",0dh,0ah,0
+    box_calc06 BYTE "║ 3) Multiplication (*)    ║",0dh,0ah,0
+    box_calc07 BYTE "║ 4) Division (/)          ║",0dh,0ah,0
+    box_calc08 BYTE "║ 5) Modulo (%)            ║",0dh,0ah,0
+    box_calc09 BYTE "║ 6) Power (^)             ║",0dh,0ah,0
+    box_calc10 BYTE "╚══════════════════════════╝",0dh,0ah,0
+
+    msg_num1 BYTE "Step 1. Enter first number:",0
+    msg_oper BYTE "Step 2. Choose operation:",0
+    msg_num2 BYTE "Step 3. Enter second number:",0
+    
+    msg_expression BYTE "Expression: ",0
+    
     msg_zero_div BYTE "Error: Division by zero is not allowed.",0
 
     str_space BYTE " ",0
@@ -10,7 +24,7 @@ INCLUDE Irvine32.inc
 
     num1 DWORD ?
     num2 DWORD ?
-    operator BYTE ?
+    operator DWORD ?
     result DWORD ?
 
 .code
@@ -19,18 +33,47 @@ main PROC
     call clrscr
 
 main_loop:
-    call read_number
+    mov edx, OFFSET box_calc01
+    call WriteString
+
+    mov edx, OFFSET box_calc02
+    call WriteString
+
+    mov edx, OFFSET box_calc03
+    call WriteString
+
+    mov edx, OFFSET box_calc04
+    call WriteString
+
+    mov edx, OFFSET box_calc05
+    call WriteString
+
+    mov edx, OFFSET box_calc06
+    call WriteString
+
+    mov edx, OFFSET box_calc07
+    call WriteString
+
+    mov edx, OFFSET box_calc08
+    call WriteString
+
+    mov edx, OFFSET box_calc09
+    call WriteString
+
+    mov edx, OFFSET box_calc10
+    call WriteString
+
+    call read_first_number
     mov [num1], eax
 
     call read_operator
-    mov [operator], al
+    mov [operator], eax
 
-    call read_number
+    call read_second_number
     mov [num2], eax
 
     call calculate_result
-
-    mov edx, OFFSET msg_result
+    mov edx, OFFSET msg_expression
     call WriteString
     call print_expression
     call Crlf
@@ -41,43 +84,50 @@ main_loop:
 main ENDP
 
 ; 숫자 입력
-read_number PROC
-    mov edx, OFFSET msg_num
+read_first_number PROC
+    mov edx, OFFSET msg_num1
     call WriteString
     call ReadInt
     ret
 
-read_number ENDP
+read_first_number ENDP
+
+read_second_number PROC
+    mov edx, OFFSET msg_num2
+    call WriteString
+    call ReadInt
+    ret
+
+read_second_number ENDP
 
 ; 연산자 입력
 read_operator PROC
     mov edx, OFFSET msg_oper
     call WriteString
-    call ReadChar
-    call Crlf
+    call ReadInt
     ret
 
 read_operator ENDP
 
 ; 계산
 calculate_result PROC
-    mov al, [operator]
-    cmp al, '+'
+    mov eax, [operator]
+    cmp eax, 1
     je do_add
 
-    cmp al, '-'
+    cmp eax, 2
     je do_sub
 
-    cmp al, '*'
+    cmp eax, 3
     je do_mul
 
-    cmp al, '/'
+    cmp eax, 4
     je do_div
 
-    cmp al, '%'
+    cmp eax, 5
     je do_mod
 
-    cmp al, '^'
+    cmp eax, 6
     je do_pow
 
 do_add:
@@ -158,22 +208,75 @@ calculate_result ENDP
 
 ; 수식 출력
 print_expression PROC
+    mov al, '('
+    call WriteChar
+
     mov eax, [num1]
     call WriteInt
 
-    mov edx, OFFSET str_space
-    call WriteString
-
-    mov al, [operator]
-    mov ah, 0
-    mov dl, al
+    mov al, ')'
     call WriteChar
 
     mov edx, OFFSET str_space
     call WriteString
 
+    mov eax, [operator]
+    cmp eax, 1
+    je print_plus
+
+    cmp eax, 2
+    je print_sub
+
+    cmp eax, 3
+    je print_mul
+
+    cmp eax, 4
+    je print_div
+
+    cmp eax, 5
+    je print_mod
+
+    cmp eax, 6
+    je print_pow
+
+print_plus:
+    mov al, '+'
+    jmp print_op
+
+print_sub:
+    mov al, '-'
+    jmp print_op
+
+print_mul:
+    mov al, '*'
+    jmp print_op
+
+print_div:
+    mov al, '/'
+    jmp print_op
+
+print_mod:
+    mov al, '%'
+    jmp print_op
+
+print_pow:
+    mov al, '^'
+    jmp print_op
+
+print_op:
+    call WriteChar
+
+    mov edx, OFFSET str_space
+    call WriteString
+
+    mov al, '('
+    call WriteChar
+
     mov eax, [num2]
     call WriteInt
+
+    mov al, ')'
+    call WriteChar
 
     mov edx, OFFSET str_equal
     call WriteString
@@ -184,6 +287,5 @@ print_expression PROC
     ret
 
 print_expression ENDP
-;---------------------------------------
 
 END main
