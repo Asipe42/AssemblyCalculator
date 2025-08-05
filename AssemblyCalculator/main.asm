@@ -22,6 +22,8 @@ INCLUDE Irvine32.inc
     str_space BYTE " ",0
     str_equal BYTE " = ",0
 
+    operator_chars BYTE '+', '-', '*', '/', '%', '^'
+
     num1 DWORD ?
     num2 DWORD ?
     operator DWORD ?
@@ -111,7 +113,6 @@ read_op_loop:
     jb read_op_loop
     cmp eax, 6
     ja read_op_loop
-
     ret
 
 read_operator ENDP
@@ -228,49 +229,8 @@ print_expression PROC
     call WriteString
 
     mov eax, [operator]
-    cmp eax, 1
-    je print_plus
-
-    cmp eax, 2
-    je print_sub
-
-    cmp eax, 3
-    je print_mul
-
-    cmp eax, 4
-    je print_div
-
-    cmp eax, 5
-    je print_mod
-
-    cmp eax, 6
-    je print_pow
-
-print_plus:
-    mov al, '+'
-    jmp print_op
-
-print_sub:
-    mov al, '-'
-    jmp print_op
-
-print_mul:
-    mov al, '*'
-    jmp print_op
-
-print_div:
-    mov al, '/'
-    jmp print_op
-
-print_mod:
-    mov al, '%'
-    jmp print_op
-
-print_pow:
-    mov al, '^'
-    jmp print_op
-
-print_op:
+    dec eax
+    mov al, operator_chars[eax]
     call WriteChar
 
     mov edx, OFFSET str_space
