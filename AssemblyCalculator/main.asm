@@ -1,7 +1,7 @@
 INCLUDE Irvine32.inc
 .data
     msg_num BYTE "Enter a number: ",0
-    msg_oper BYTE "Enter an operator (+, -, *, /): ",0
+    msg_oper BYTE "Enter an operator (+, -, *, /, %, ^): ",0
     msg_result BYTE "Result: ",0
     msg_zero_div BYTE "Error: Division by zero is not allowed.",0
 
@@ -19,13 +19,13 @@ main PROC
     call clrscr
 
 main_loop:
-    call read_validated_number
+    call read_number
     mov [num1], eax
 
-    call read_validated_operator
+    call read_operator
     mov [operator], al
 
-    call read_validated_number
+    call read_number
     mov [num2], eax
 
     call calculate_result
@@ -41,23 +41,23 @@ main_loop:
 main ENDP
 
 ; 숫자 입력
-read_validated_number PROC
+read_number PROC
     mov edx, OFFSET msg_num
     call WriteString
     call ReadInt
     ret
 
-read_validated_number ENDP
+read_number ENDP
 
 ; 연산자 입력
-read_validated_operator PROC
+read_operator PROC
     mov edx, OFFSET msg_oper
     call WriteString
     call ReadChar
     call Crlf
     ret
 
-read_validated_operator ENDP
+read_operator ENDP
 
 ; 계산
 calculate_result PROC
@@ -73,6 +73,12 @@ calculate_result PROC
 
     cmp al, '/'
     je do_div
+
+    cmp al, '%'
+    je do_mod
+
+    cmp al, '^'
+    je do_pow
 
 do_add:
     mov eax, [num1]
@@ -112,8 +118,45 @@ divide_by_zero_error:
     mov [result], eax
     ret
 
+do_mod:
+    mov eax, [num2]
+    cmp eax, 0
+    je divide_by_zero_error
+
+    mov eax, [num1]
+    cdq
+    idiv dword ptr [num2]
+    mov [result], edx
+    ret
+
+do_pow:
+    mov ecx, [num2] ; 지수
+    cmp ecx, 0  
+    jl pow_negative
+
+    mov eax, 1      ; 결과
+    mov ebx, [num1] ; 밑
+    jmp pow_loop
+
+pow_negative:
+    mov eax, 1
+    mov [result], eax
+    ret
+
+pow_loop:
+    cmp ecx, 0
+    je pow_done
+    imul eax, ebx
+    dec ecx
+    jmp pow_loop
+
+pow_done:
+    mov [result], eax
+    ret
+
 calculate_result ENDP
 
+; 수식 출력
 print_expression PROC
     mov eax, [num1]
     call WriteInt
@@ -141,5 +184,6 @@ print_expression PROC
     ret
 
 print_expression ENDP
+;---------------------------------------
 
 END main
