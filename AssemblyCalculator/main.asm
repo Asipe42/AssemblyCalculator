@@ -11,9 +11,9 @@ INCLUDE Irvine32.inc
     box_calc09 BYTE "║ 6) Power (^)             ║",0dh,0ah,0
     box_calc10 BYTE "╚══════════════════════════╝",0dh,0ah,0
 
-    msg_num1 BYTE "Step 1. Enter first number:",0
-    msg_oper BYTE "Step 2. Choose operation:",0
-    msg_num2 BYTE "Step 3. Enter second number:",0
+    msg_num1 BYTE "Step 1. Enter first number: ",0
+    msg_oper BYTE "Step 2. Choose operation: ",0
+    msg_num2 BYTE "Step 3. Enter second number: ",0
     
     msg_expression BYTE "Expression: ",0
     
@@ -101,10 +101,17 @@ read_second_number PROC
 read_second_number ENDP
 
 ; 연산자 입력
-read_operator PROC
+read_operator PROC    
+read_op_loop:
     mov edx, OFFSET msg_oper
     call WriteString
     call ReadInt
+
+    cmp eax, 1
+    jb read_op_loop
+    cmp eax, 6
+    ja read_op_loop
+
     ret
 
 read_operator ENDP
